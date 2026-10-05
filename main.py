@@ -46,7 +46,7 @@ async def main(request: Request):
                 "Content-Type": "application/json",
             },
             json={
-                "model": deepseek-v4-flash:0731,
+                "model": MODEL,
                 "messages": [{"role": "user", "content": user_text}],
             },
             timeout=4,
