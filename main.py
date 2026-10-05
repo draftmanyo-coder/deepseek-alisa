@@ -10,7 +10,7 @@ LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
 LLM7_API_KEY = os.getenv("LLM7_API_KEY")
 
 # Модель-селектор: автоматически выбирает быструю доступную модель
-MODEL = "fast"
+MODEL = "DeepSeek-V4-Flash-0731"
 
 logging.basicConfig(level=logging.INFO)
 
