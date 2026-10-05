@@ -50,7 +50,7 @@ async def main(request: Request):
                 "model": meta-llama/llama-3.3-70b-instruct:free,
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=4,  # Алиса ждёт максимум 4.5 секунды
+            timeout=5,  # Алиса ждёт максимум 4.5 секунды
         )
         response.raise_for_status()
         answer = response.json()["choices"][0]["message"]["content"]
