@@ -44,7 +44,7 @@ async def main(request: Request):
             LLM7_API_URL,
             headers=headers,
             json={
-                "model": "llama-4-maverick",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
+                "model": "DeepSeek-V4.1-Flash",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
                 "messages": [{"role": "user", "content": user_text}],
             },
             timeout=4,
