@@ -5,12 +5,12 @@ import requests
 
 app = FastAPI()
 
-# OpenRouter API
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# LLM7.io API
+LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
+LLM7_API_KEY = os.getenv("LLM7_API_KEY")
 
-# Модель (бесплатная)
-MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+# Модель-селектор: автоматически выбирает быструю доступную модель
+MODEL = "fast"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,35 +32,34 @@ async def main(request: Request):
         version = body["version"]
         session = body["session"]
 
-        # Ответ на проверочный запрос от Яндекса
         if user_text == "ping":
             return make_response(version, session, "pong")
 
-        if not OPENROUTER_API_KEY:
-            logging.error("OPENROUTER_API_KEY не задан")
+        if not LLM7_API_KEY:
+            logging.error("LLM7_API_KEY не задан")
             return make_response(version, session, "Ошибка конфигурации сервера.")
 
         response = requests.post(
-            OPENROUTER_API_URL,
+            LLM7_API_URL,
             headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Authorization": f"Bearer {LLM7_API_KEY}",
                 "Content-Type": "application/json",
             },
             json={
-                "model": meta-llama/llama-3.3-70b-instruct:free,
+                "model": deepseek-v4-flash:0731,
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=5,  # Алиса ждёт максимум 4.5 секунды
+            timeout=4,
         )
         response.raise_for_status()
         answer = response.json()["choices"][0]["message"]["content"]
         return make_response(version, session, answer)
 
     except requests.exceptions.Timeout:
-        logging.error("Таймаут при запросе к OpenRouter")
+        logging.error("Таймаут при запросе к LLM7.io")
         return make_response(body["version"], body["session"], "Сейчас не могу ответить, попробуйте позже.")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Ошибка при запросе к OpenRouter: {e}")
+        logging.error(f"Ошибка при запросе к LLM7.io: {e}")
         return make_response(body["version"], body["session"], "Не удалось получить ответ.")
     except Exception as e:
         logging.error(f"Неизвестная ошибка: {e}")
