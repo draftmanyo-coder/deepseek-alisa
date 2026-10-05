@@ -47,7 +47,7 @@ async def main(request: Request):
                 "model": "default",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=4,
+            timeout=6,
         )
         response.raise_for_status()
         # Ответ приходит в стандартном формате OpenAI
