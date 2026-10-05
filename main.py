@@ -5,9 +5,12 @@ import requests
 
 app = FastAPI()
 
-# Новый адрес API и ключ из переменной окружения
-LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
-LLM7_API_KEY = os.getenv("LLM7_API_KEY") # Имя переменной, которую мы задали на Render
+# OpenRouter API
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+# Модель (бесплатная)
+MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,37 +32,36 @@ async def main(request: Request):
         version = body["version"]
         session = body["session"]
 
+        # Ответ на проверочный запрос от Яндекса
         if user_text == "ping":
             return make_response(version, session, "pong")
 
-        if not LLM7_API_KEY:
-            logging.error("LLM7_API_KEY не задан")
-            # Можно использовать анонимный доступ, если ключа нет
-            headers = {}
-        else:
-            headers = {"Authorization": f"Bearer {LLM7_API_KEY}"}
+        if not OPENROUTER_API_KEY:
+            logging.error("OPENROUTER_API_KEY не задан")
+            return make_response(version, session, "Ошибка конфигурации сервера.")
 
-        # Новый формат запроса для LLM7.io (совместим с OpenAI)
         response = requests.post(
-            LLM7_API_URL,
-            headers=headers,
+            OPENROUTER_API_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
             json={
-                "model": "fast",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
+                "model": MODEL,
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=4,
+            timeout=4,  # Алиса ждёт максимум 4.5 секунды
         )
         response.raise_for_status()
-        # Ответ приходит в стандартном формате OpenAI
         answer = response.json()["choices"][0]["message"]["content"]
         return make_response(version, session, answer)
 
     except requests.exceptions.Timeout:
-        logging.error("Таймаут при запросе к LLM7.io")
-        return make_response(body["version"], body["session"], "LLM7.io не ответил вовремя.")
+        logging.error("Таймаут при запросе к OpenRouter")
+        return make_response(body["version"], body["session"], "Сейчас не могу ответить, попробуйте позже.")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Ошибка при запросе к LLM7.io: {e}")
-        return make_response(body["version"], body["session"], "Не удалось получить ответ от LLM7.io.")
+        logging.error(f"Ошибка при запросе к OpenRouter: {e}")
+        return make_response(body["version"], body["session"], "Не удалось получить ответ.")
     except Exception as e:
         logging.error(f"Неизвестная ошибка: {e}")
         return make_response(body["version"], body["session"], "Произошла внутренняя ошибка.")
