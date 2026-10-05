@@ -10,7 +10,7 @@ LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
 LLM7_API_KEY = os.getenv("LLM7_API_KEY")
 
 # Модель — укажите вручную
-MODEL = "gemini-omni-flash"
+MODEL = "fast"
 
 logging.basicConfig(level=logging.INFO)
 
