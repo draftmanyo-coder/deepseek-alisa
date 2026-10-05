@@ -9,8 +9,8 @@ app = FastAPI()
 LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
 LLM7_API_KEY = os.getenv("LLM7_API_KEY")
 
-# Модель-селектор: автоматически выбирает быструю доступную модель
-MODEL = "DeepSeek-V4-Flash-0731"
+# Модель — укажите вручную
+MODEL = "llama-3.1-8b-instant"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -49,7 +49,7 @@ async def main(request: Request):
                 "model": MODEL,
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=4,
+            timeout=10,
         )
         response.raise_for_status()
         answer = response.json()["choices"][0]["message"]["content"]
