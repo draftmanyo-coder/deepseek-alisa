@@ -5,8 +5,9 @@ import requests
 
 app = FastAPI()
 
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+# Новый адрес API и ключ из переменной окружения
+LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
+LLM7_API_KEY = os.getenv("LLM7_API_KEY") # Имя переменной, которую мы задали на Render
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,33 +29,37 @@ async def main(request: Request):
         version = body["version"]
         session = body["session"]
 
-        # Проверка на проверочный запрос "ping" от Яндекса
         if user_text == "ping":
             return make_response(version, session, "pong")
 
-        if not DEEPSEEK_API_KEY:
-            logging.error("DEEPSEEK_API_KEY не задан")
-            return make_response(version, session, "Ошибка конфигурации сервера.")
+        if not LLM7_API_KEY:
+            logging.error("LLM7_API_KEY не задан")
+            # Можно использовать анонимный доступ, если ключа нет
+            headers = {}
+        else:
+            headers = {"Authorization": f"Bearer {LLM7_API_KEY}"}
 
+        # Новый формат запроса для LLM7.io (совместим с OpenAI)
         response = requests.post(
-            DEEPSEEK_API_URL,
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+            LLM7_API_URL,
+            headers=headers,
             json={
-                "model": "deepseek-chat",
+                "model": "default",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
                 "messages": [{"role": "user", "content": user_text}],
             },
             timeout=20,
         )
         response.raise_for_status()
+        # Ответ приходит в стандартном формате OpenAI
         answer = response.json()["choices"][0]["message"]["content"]
         return make_response(version, session, answer)
 
     except requests.exceptions.Timeout:
-        logging.error("Таймаут при запросе к DeepSeek")
-        return make_response(body["version"], body["session"], "DeepSeek не ответил вовремя.")
+        logging.error("Таймаут при запросе к LLM7.io")
+        return make_response(body["version"], body["session"], "LLM7.io не ответил вовремя.")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Ошибка при запросе к DeepSeek: {e}")
-        return make_response(body["version"], body["session"], "Не удалось получить ответ от DeepSeek.")
+        logging.error(f"Ошибка при запросе к LLM7.io: {e}")
+        return make_response(body["version"], body["session"], "Не удалось получить ответ от LLM7.io.")
     except Exception as e:
         logging.error(f"Неизвестная ошибка: {e}")
         return make_response(body["version"], body["session"], "Произошла внутренняя ошибка.")
