@@ -10,7 +10,7 @@ LLM7_API_URL = "https://api.llm7.io/v1/chat/completions"
 LLM7_API_KEY = os.getenv("LLM7_API_KEY")
 
 # Модель — укажите вручную
-MODEL = "default"
+MODEL = "DeepSeek-V4-Flash-0731"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -49,7 +49,7 @@ async def main(request: Request):
                 "model": MODEL,
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=4,
+            timeout=10,
         )
         response.raise_for_status()
         answer = response.json()["choices"][0]["message"]["content"]
