@@ -44,10 +44,10 @@ async def main(request: Request):
             LLM7_API_URL,
             headers=headers,
             json={
-                "model": "default",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
+                "model": "llama-4-maverick",  # LLM7.io сам выберет доступную модель (включая DeepSeek)
                 "messages": [{"role": "user", "content": user_text}],
             },
-            timeout=6,
+            timeout=4,
         )
         response.raise_for_status()
         # Ответ приходит в стандартном формате OpenAI
