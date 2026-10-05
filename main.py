@@ -47,7 +47,7 @@ async def main(request: Request):
                 "Content-Type": "application/json",
             },
             json={
-                "model": MODEL,
+                "model": meta-llama/llama-3.3-70b-instruct:free,
                 "messages": [{"role": "user", "content": user_text}],
             },
             timeout=4,  # Алиса ждёт максимум 4.5 секунды
